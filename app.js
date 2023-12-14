@@ -24,6 +24,27 @@ app.get('/api/v1/tours', (req, res) => {
   });
 });
 
+//get tour by Id
+//'/api/v1/tours/:id' use req.params to get the variable value
+//'/api/v1/tours/:id/:x?' use '?' at the end of a variable on the route to make it optional
+app.get('/api/v1/tours/:id', (req, res) => {
+  const id = req.params.id * 1; // '* 1' to convert a string to a number
+  const tour = tours.find((el) => el.id === id);
+
+  if (!tour)
+    return res.status(404).json({
+      status: 'fail',
+      message: 'invalid Id',
+    });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour,
+    },
+  });
+});
+
 //add new tour the req object is what hold all the information, about the request that was done
 app.post('/api/v1/tours', (req, res) => {
   const newId = tours[tours.length - 1].id + 1;

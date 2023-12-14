@@ -83,11 +83,21 @@ const deleteTour = (req, res) => {
 };
 
 // All routes
+
+/*
 app.get('/api/v1/tours', getAllTours);
 app.get('/api/v1/tours/:id', getTour);
 app.post('/api/v1/tours', addTour);
 app.patch('/api/v1/tours/:id', updateTour);
 app.delete('/api/v1/tours/:id', deleteTour);
+*/
+
+/**refactoring all routes */
+
+const rootRoute = '/api/v1/tours';
+
+app.route(rootRoute).get(getAllTours).post(addTour);
+app.route(`${rootRoute}/:id`).get(getTour).patch(updateTour).delete(deleteTour);
 
 const port = 3000;
 app.listen(port, () => {

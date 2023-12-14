@@ -7,7 +7,6 @@ the incomming request data.
 It's called middleware because it stand between the middle of the request and the response
 it's just a step that the request goes through while it's being processed*/
 app.use(express.json());
-const port = 3000;
 
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
@@ -68,6 +67,37 @@ app.post('/api/v1/tours', (req, res) => {
   );
 });
 
+//update tour
+app.patch('/api/v1/tours/:id', (req, res) => {
+  if (req.params.id * 1 > tours.length)
+    return res.status(404).json({
+      status: 'fail',
+      message: 'invalid Id',
+    });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour: '<Updated tour here...>',
+    },
+  });
+});
+
+//delete tour
+app.delete('/api/v1/tours/:id', (req, res) => {
+  if (req.params.id * 1 > tours.length)
+    return res.status(404).json({
+      status: 'fail',
+      message: 'invalid Id',
+    });
+  //204 status code mans no content, that because as a result we don't usually send any data back
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
+const port = 3000;
 app.listen(port, () => {
   console.log(`App running on port ${port}...`);
 });

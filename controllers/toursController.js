@@ -5,6 +5,19 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
 
+/*check valid id middleware
+removes repeated code from handlers
+param middleware is middleware that only runs for certain parameters,
+when we have a certain param. in our URL*/
+exports.checkID = (req, res, next, val) => {
+  if (req.params.id * 1 > tours.length)
+    return res.status(404).json({
+      status: 'fail',
+      message: 'invalid Id',
+    });
+  next();
+};
+
 //Route Handlers
 exports.getAllTours = (req, res) => {
   console.log(req.requestTime);
@@ -20,12 +33,6 @@ exports.getAllTours = (req, res) => {
 exports.getTour = (req, res) => {
   const id = req.params.id * 1;
   const tour = tours.find((el) => el.id === id);
-
-  if (!tour)
-    return res.status(404).json({
-      status: 'fail',
-      message: 'invalid Id',
-    });
 
   res.status(200).json({
     status: 'success',
@@ -54,12 +61,6 @@ exports.addTour = (req, res) => {
 };
 
 exports.updateTour = (req, res) => {
-  if (req.params.id * 1 > tours.length)
-    return res.status(404).json({
-      status: 'fail',
-      message: 'invalid Id',
-    });
-
   res.status(200).json({
     status: 'success',
     data: {
@@ -69,11 +70,6 @@ exports.updateTour = (req, res) => {
 };
 
 exports.deleteTour = (req, res) => {
-  if (req.params.id * 1 > tours.length)
-    return res.status(404).json({
-      status: 'fail',
-      message: 'invalid Id',
-    });
   res.status(204).json({
     status: 'success',
     data: null,

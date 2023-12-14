@@ -1,15 +1,33 @@
 const express = require('express');
 const fs = require('fs');
+const morgan = require('morgan');
 
 const app = express();
+//3rd-party middleware
+//morgan popular login middleware -> npm i morgan
+app.use(morgan('dev'));
 
+//MiddleWare
 app.use(express.json());
 
+app.use(function (req, res, next) {
+  console.log('Hello from the middleware :D');
+  next();
+});
+
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
+//array of tours Objects read from file
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
+//Route Handlers
 const getAllTours = (req, res) => {
+  console.log(req.requestTime);
   res.status(200).json({
     status: 'success',
     results: tours.length,
@@ -82,22 +100,63 @@ const deleteTour = (req, res) => {
   });
 };
 
+//User route Handlers
+
+const getAllUsers = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined!',
+  });
+};
+
+const createUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined!',
+  });
+};
+
+const getUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined!',
+  });
+};
+
+const updateUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined!',
+  });
+};
+
+const delUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined!',
+  });
+};
+
 // All routes
+const rootRoute = '/api/v1';
+const toursRoute = '/tours';
+const usersRoute = '/users';
 
-/*
-app.get('/api/v1/tours', getAllTours);
-app.get('/api/v1/tours/:id', getTour);
-app.post('/api/v1/tours', addTour);
-app.patch('/api/v1/tours/:id', updateTour);
-app.delete('/api/v1/tours/:id', deleteTour);
-*/
+//1-create a new Router, this is called mounting the router on a route
+const tourRouter = express.Router();
+const userRouter = express.Router();
 
-/**refactoring all routes */
+//2-Use middleware
+app.use(`${rootRoute}${toursRoute}`, tourRouter);
+app.use(`${rootRoute}${usersRoute}`, userRouter);
 
-const rootRoute = '/api/v1/tours';
+//tours
+tourRouter.route('/').get(getAllTours).post(addTour);
+tourRouter.route(`/:id`).get(getTour).patch(updateTour).delete(deleteTour);
 
-app.route(rootRoute).get(getAllTours).post(addTour);
-app.route(`${rootRoute}/:id`).get(getTour).patch(updateTour).delete(deleteTour);
+//users
+userRouter.route('/').get(getAllUsers).post(createUser);
+userRouter.route(`/:id`).get(getUser).patch(updateUser).delete(delUser);
 
 const port = 3000;
 app.listen(port, () => {

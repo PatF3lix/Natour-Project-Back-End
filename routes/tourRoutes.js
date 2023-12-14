@@ -6,7 +6,10 @@ const router = express.Router();
 /*param middleware*/
 router.param('id', controller.checkID);
 
-router.route('/').get(controller.getAllTours).post(controller.addTour);
+router
+  .route('/')
+  .get(controller.getAllTours)
+  .post(controller.checkBody, controller.addTour); //chaining multiple middleware
 router
   .route(`/:id`)
   .get(controller.getTour)

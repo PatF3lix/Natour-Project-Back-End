@@ -1,0 +1,9 @@
+how to use eslint
+
+//dev dependencies
+
+npm i eslint prettier eslint-config-prettier eslint-plugin-prettier
+ eslint-config-airbnb eslint-plugin-node eslint-plugin-import
+  eslint-plugin-jsx eslint-plugin-react --save-dev
+
+go in the eslintrc.json file to configure eslint

@@ -22,7 +22,19 @@ exports.getAllTours = async (req, res) => {
       const sortBy = req.query.sort.split(',').join(' ');
       query = query.sort(sortBy);
     } else {
+      //default
       query = query.sort('-createdAt');
+    }
+
+    //3) Field limiting, in order to only get the desired property field from the mongo document
+    if (req.query.fields) {
+      const fields = req.query.fields.split(',').join(' ');
+      //this is called projecting
+      query = query.select(fields);
+    } else {
+      //default putting the '-'in front of a property will exclude it
+      //__v is a property used by mongodb, not usefull for the client
+      query = query.select('-__v');
     }
 
     //execute the query

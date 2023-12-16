@@ -4,17 +4,26 @@ const Tour = require('../models/tourModel');
 exports.getAllTours = async (req, res) => {
   try {
     //build query
-    //1) filtering
+    //1A) filtering
     const queryObj = { ...req.query };
     //filtering url queries, in order to exclude certain fields from the queries
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach((el) => delete queryObj[el]);
-    //2) advanced filtering
+    //1B) advanced filtering
     let queryStr = JSON.stringify(queryObj);
     //replacing the gte,gt,lte,lt in query query string with the mondodb var $gte,$gt,$lte,$lt
     //using a regular expression
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    const query = Tour.find(JSON.parse(queryStr));
+    let query = Tour.find(JSON.parse(queryStr));
+
+    //2) sorting
+    if (req.query.sort) {
+      //this permits the user to sort by more than one field
+      const sortBy = req.query.sort.split(',').join(' ');
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort('-createdAt');
+    }
 
     //execute the query
     const tours = await query;

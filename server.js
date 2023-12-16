@@ -9,14 +9,15 @@ mongoose
   .connect(DB, {
     useNewUrlParser: true,
     useCreateIndex: true,
+    useUnifiedTopology: true,
     useFindAndModify: false,
   })
   .then(() => {
     console.log('DB connection successful');
-  });
+    const port = process.env.PORT || 3000;
 
-const port = process.env.PORT || 3000;
-
-app.listen(port, () => {
-  console.log(`App running on port ${port}...`);
-});
+    app.listen(port, () => {
+      console.log(`App running on port ${port}...`);
+    });
+  })
+  .catch((err) => console.log(err));

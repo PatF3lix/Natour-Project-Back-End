@@ -37,6 +37,23 @@ exports.getAllTours = async (req, res) => {
       query = query.select('-__v');
     }
 
+    //4) Pagination
+    //using the || operator to short circuit and set a default;, '* 1' in order to change string to number
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 100;
+    const skip = (page - 1) * limit;
+
+    /**limit: exactly the same as the limit that we defined in the quey string.
+     * Skip: the amount of results that should be skipped before actually querying data.
+     */
+    query = query.skip(skip).limit(limit);
+
+    if (req.query.page) {
+      //return the number of documents
+      const numTours = await Tour.countDocuments();
+      if (skip >= numTours) throw new Error('This page does not exist');
+    }
+
     //execute the query
     const tours = await query;
 

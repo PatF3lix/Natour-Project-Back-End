@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const slugify = require('slugify');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const validator = require('validator');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -11,6 +13,7 @@ const tourSchema = new mongoose.Schema(
       trim: true,
       maxlength: [40, 'S tour name must have less or equal to 40 characters'],
       minlength: [10, 'S tour name must have less or equal to 10 characters'],
+      // validate: [validator.isAlpha, 'Tour name must only contain characters'], exemple
     },
     slug: String,
     duration: {
@@ -35,7 +38,17 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'A tour must have a price'],
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      //custom validator
+      validate: {
+        validator: function (val) {
+          //will only work with create, not with update
+          return val < this.price; // 100 < 200
+        },
+        message: 'Discount price ({VALUE}) should be below regular price',
+      },
+    },
     summary: {
       type: String,
       trim: true,
@@ -71,6 +84,7 @@ const tourSchema = new mongoose.Schema(
     },
   },
   {
+    //in order to showcase virtual fields in output
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },

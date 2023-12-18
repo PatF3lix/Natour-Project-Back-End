@@ -7,6 +7,8 @@ router
   .route('/top-5-cheap')
   .get(controller.aliasTopTours, controller.getAllTours);
 
+router.route('/tour-stats').get(controller.getTourStats);
+
 router.route('/').get(controller.getAllTours).post(controller.addTour);
 router
   .route(`/:id`)

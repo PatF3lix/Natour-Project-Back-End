@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'a user must have a password'],
     minlength: [8, 'a password must have 8 characters or more'],
+    select: false,
   },
   passwordConfirm: {
     type: String,
@@ -69,6 +70,20 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+//instance Method
+//instance mthods are available on all user documents
+/*
+  this funct returns true if both passwords are the same,
+  this func hashed the password passed in during login, hashes that password using bcrypt,
+  then compares it to the one stored in the database
+*/
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword,
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 const User = mongoose.model('User', userSchema);
 

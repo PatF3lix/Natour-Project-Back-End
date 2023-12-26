@@ -5,6 +5,8 @@ const slugify = require('slugify');
 const validator = require('validator');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const bcrypt = require('bcryptjs');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const crypto = require('crypto');
 
 //name, email, photo, password, password confirm
 const userSchema = new mongoose.Schema({
@@ -52,6 +54,8 @@ const userSchema = new mongoose.Schema({
     select: false,
   },
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 //Middleware
@@ -98,6 +102,24 @@ userSchema.methods.changedPasswordAfter = async function (JWTTimestamp) {
   }
   //False means not changed
   return JWTTimestamp < changedTimeStamp;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  /**We are creating this token, to send it to the user and so it's like a
+   * reset password really that the user can then use to create a new real password.
+   * of course only the user will have access to this token.
+   */
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  //encrypting the token
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  //10min to reset password
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  console.log({ resetToken }, this.passwordResetToken);
+  //we send the token by email, and we keep the encrypted version in our database.
+  return resetToken;
 };
 
 const User = mongoose.model('User', userSchema);

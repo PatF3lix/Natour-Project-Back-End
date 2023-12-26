@@ -118,3 +118,22 @@ exports.restrictTo =
     }
     next();
   };
+
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  //1) et user based on Posted email
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(
+      new AppError('There is no user associated to that email address.', 404),
+    );
+  }
+  //2) Generate the random reset token
+  const resetToken = user.createPasswordResetToken();
+  //to remove required fields from usermodel post request while using the save method
+  // set validateBeforeSave : false
+  await user.save({ validateBeforeSave: false });
+  //3) Send it to user's email
+
+  next();
+});
+exports.resetPassword = (req, res, next) => {};

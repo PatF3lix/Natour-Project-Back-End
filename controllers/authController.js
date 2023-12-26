@@ -13,6 +13,18 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: {
+      user,
+    },
+  });
+};
+
 //post request
 exports.signUp = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
@@ -22,15 +34,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
   });
 
-  const token = signToken(newUser._id);
-
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: {
-      user: newUser,
-    },
-  });
+  createSendToken(newUser, 201, res);
 });
 
 //post request
@@ -53,11 +57,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   //3) if everything ok, send token to client
-  const token = signToken(user._id);
-  res.status(200).json({
-    status: 'success',
-    token,
-  });
+  createSendToken(user, 200, res);
 });
 
 //protect route from being exploited before user is logged in
@@ -193,10 +193,20 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   //3) Update changedPasswordAt property for the user
 
   //4) Log the user in, send JWT
-  const token = signToken(user._id);
+  createSendToken(user, 201, res);
+});
 
-  res.status(200).json({
-    status: 'success',
-    token,
-  });
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  //1) Get user from collection
+  const user = await User.findById(req.user.id).select('+password');
+  //2) check if posted current password is correct
+  if (!(await user.correctPassword(req.body.currentPassword, user.password))) {
+    return next(new AppError('Your current password is wrong.', 401));
+  }
+  //3) If so, update password
+  user.password = req.body.newPassword;
+  user.passwordConfirm = req.body.newPasswordConfirm;
+  await user.save();
+  //4) Log user in, send Jwt
+  createSendToken(user, 201, res);
 });

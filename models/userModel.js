@@ -81,6 +81,15 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+//this function updates the PasswordChangedAt field, when password is reset
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+  //-1000 to remove async problems, small hack but will work for the time being
+  //will then ensure that the token is always created after the password has been changed
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
 //instance Method
 //instance mthods are available on all user documents
 /*

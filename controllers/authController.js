@@ -1,5 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const jwt = require('jsonwebtoken');
+const { promisify } = require('util');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
@@ -73,11 +74,47 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
   //2) verification token
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
   //3) check if user still exists
+  /** We do this so that we can be 100% sure that the iD is actually correct,
+   * because if we made it until this point of the code here then it means that the verification
+   * process, that we had previously, was successfull, Otherwise the following line of code
+   * would of caused an error which would then of provented the function from continuing.
+   */
+  const freshUser = await User.findById(decoded.id);
+  if (!freshUser)
+    return next(
+      new AppError('The user belonging yo this token, no longer exists', 401),
+    );
 
   //4) check if user changed password after the token was issued
-
-  //5)
+  //iat is the jwt timestamp
+  if (await freshUser.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppError(
+        'User recently changed password! Please log in again.!',
+        401,
+      ),
+    );
+  }
+  //5) Grant access to protected route
+  req.user = freshUser; //maybe usefull at some point in future
   next();
 });
+
+/*Since we cannot pass argument to a middleware function,
+we wrap that function within a function, giving it access to the roles variable
+due to closure.*/
+
+exports.restrictTo =
+  (...roles) =>
+  (req, res, next) => {
+    //roles ['admin', 'lead-guide']; default=role='user'
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError('You do not have permission to perform this action', 403),
+      );
+    }
+    next();
+  };

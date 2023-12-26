@@ -24,6 +24,11 @@ const userSchema = new mongoose.Schema({
   photo: {
     type: String,
   },
+  role: {
+    type: String,
+    enum: ['user', 'guide', 'lead-guide', 'admin'],
+    default: 'user',
+  },
   password: {
     type: String,
     required: [true, 'a user must have a password'],
@@ -46,6 +51,7 @@ const userSchema = new mongoose.Schema({
     //in order to exclude fields, put the select property to false, like below
     select: false,
   },
+  passwordChangedAt: Date,
 });
 
 //Middleware
@@ -83,6 +89,15 @@ userSchema.methods.correctPassword = async function (
   userPassword,
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changedPasswordAfter = async function (JWTTimestamp) {
+  let changedTimeStamp;
+  if (this.passwordChangedAt) {
+    changedTimeStamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+  }
+  //False means not changed
+  return JWTTimestamp < changedTimeStamp;
 };
 
 const User = mongoose.model('User', userSchema);

@@ -1,15 +1,29 @@
 const express = require('express');
 const morgan = require('morgan');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const rateLimit = require('express-rate-limit');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
-/**This file has the main purpose of holding all the Express configuration needed to make the application */
+
+/**This file has the main purpose of holding all the Express configuration needed
+ * to make the application */
 const app = express();
 //Middlewares for all the routes
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+//protection from brute force and Dos (Denial of service)
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour!',
+});
+
+app.use('/api', limiter);
+
 app.use(express.json());
 //Serving Static files
 app.use(express.static(`${__dirname}/public`));

@@ -4,6 +4,10 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const helmet = require('helmet');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const mongoSanitizer = require('express-mongo-sanitize');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const xss = require('xss-clean');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const AppError = require('./utils/appError');
@@ -34,6 +38,13 @@ app.use('/api', limiter);
 
 //body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
+
+//Data Sanitization agaisnt noSql query injection
+//install express-mongo-sanitize & xss-clean
+app.use(mongoSanitizer);
+
+//data Sanitization agaisnt xss
+app.use(xss());
 
 //Serving Static files
 app.use(express.static(`${__dirname}/public`));

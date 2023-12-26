@@ -2,6 +2,8 @@ const express = require('express');
 const morgan = require('morgan');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const rateLimit = require('express-rate-limit');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const helmet = require('helmet');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const AppError = require('./utils/appError');
@@ -10,12 +12,18 @@ const globalErrorHandler = require('./controllers/errorController');
 /**This file has the main purpose of holding all the Express configuration needed
  * to make the application */
 const app = express();
-//Middlewares for all the routes
+
+//**Global middeware */
+
+//Set Security http headers
+app.use(helmet());
+
+//development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-//protection from brute force and Dos (Denial of service)
+//protection from brute force and Dos (Denial of service), limit requests from same api
 const limiter = rateLimit({
   max: 100,
   windowMs: 60 * 60 * 1000,
@@ -24,7 +32,9 @@ const limiter = rateLimit({
 
 app.use('/api', limiter);
 
-app.use(express.json());
+//body parser, reading data from body into req.body
+app.use(express.json({ limit: '10kb' }));
+
 //Serving Static files
 app.use(express.static(`${__dirname}/public`));
 
@@ -33,6 +43,7 @@ app.use(express.static(`${__dirname}/public`));
 //   next();
 // });
 
+//Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();

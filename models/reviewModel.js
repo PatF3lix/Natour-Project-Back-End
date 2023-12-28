@@ -17,7 +17,7 @@ const reviewSchema = new mongoose.Schema(
     },
     tour: {
       type: mongoose.Schema.ObjectId,
-      ref: 'Tour',
+      ref: 'Tours',
       required: ['Review must belong to a tour.'],
     },
     user: {
@@ -32,6 +32,21 @@ const reviewSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   },
 );
+
+//this function will populate the guides field for every find()
+reviewSchema.pre(/^find/, function (next) {
+  //populate: specifies paths which should be populated with other documents.
+  //Paths are populated after the query executes and a response is received.
+  //to specifie fileds you want to exclude or include pass in an object like so
+  this.populate({
+    path: 'user',
+    select: 'name',
+  }).populate({
+    path: 'tour',
+    select: '-guides name photo',
+  });
+  next();
+});
 
 const Review = mongoose.model('Review', reviewSchema);
 

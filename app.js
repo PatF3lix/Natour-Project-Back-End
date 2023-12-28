@@ -12,6 +12,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
@@ -79,10 +80,12 @@ app.use((req, res, next) => {
 const rootRoute = '/api/v1';
 const toursRoute = '/tours';
 const usersRoute = '/users';
+const reviewsRoute = '/reviews';
 
 //mounting routers
 app.use(`${rootRoute}${toursRoute}`, tourRouter);
 app.use(`${rootRoute}${usersRoute}`, userRouter);
+app.use(`${rootRoute}${reviewsRoute}`, reviewRouter);
 
 /*handling all routes that are not created in this api, in order to return a json object,
 in case the user type in a route that doesn't exist.

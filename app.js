@@ -43,7 +43,7 @@ app.use(express.json({ limit: '10kb' }));
 
 //Data Sanitization agaisnt noSql query injection
 //install express-mongo-sanitize & xss-clean
-app.use(mongoSanitizer);
+app.use(mongoSanitizer());
 
 //data Sanitization agaisnt xss
 app.use(xss());

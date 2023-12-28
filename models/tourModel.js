@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const slugify = require('slugify');
 // eslint-disable-next-line import/no-extraneous-dependencies
 // const validator = require('validator');
-const User = require('./userModel');
+// const User = require('./userModel'); only necessary for embedding user objects in tours document
 
 const tourSchema = new mongoose.Schema(
   {
@@ -94,7 +94,6 @@ const tourSchema = new mongoose.Schema(
       address: String,
       description: String,
     },
-    //Embeded document object needs to be inside an array
     locations: [
       {
         type: {
@@ -108,7 +107,15 @@ const tourSchema = new mongoose.Schema(
         day: Number,
       },
     ],
-    guides: Array,
+    //Embeded document object needs to be inside an array
+    // guides: Array, **For Embedding user in the tours document
+    /** */
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
     //in order to showcase virtual fields in output
@@ -128,13 +135,14 @@ tourSchema.pre('save', function (next) {
   next();
 });
 
-tourSchema.pre('save', async function (next) {
-  //the result of async (id) => await User.findById(id) will be promises ;
-  const guidesPromises = this.guides.map(async (id) => await User.findById(id));
-  //in order to retrieve the data from these promises we use await Promise.all() to fetch the data;
-  this.guides = await Promise.all(guidesPromises);
-  next();
-});
+//**For embedding users in the tours document */
+// tourSchema.pre('save', async function (next) {
+//   //the result of async (id) => await User.findById(id) will be promises ;
+//   const guidesPromises = this.guides.map(async (id) => await User.findById(id));
+//   //in order to retrieve the data from these promises we use await Promise.all() to fetch the data;
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
 
 // tourSchema.pre('save', (next) => {
 //   console.log('Will save document...');

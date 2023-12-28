@@ -38,12 +38,17 @@ reviewSchema.pre(/^find/, function (next) {
   //populate: specifies paths which should be populated with other documents.
   //Paths are populated after the query executes and a response is received.
   //to specifie fileds you want to exclude or include pass in an object like so
+  //   this.populate({
+  //     path: 'user',
+  //     select: 'name',
+  //   }).populate({
+  //     path: 'tour',
+  //     select: '-guides name photo',
+  //   });
+
   this.populate({
     path: 'user',
     select: 'name',
-  }).populate({
-    path: 'tour',
-    select: '-guides name photo',
   });
   next();
 });

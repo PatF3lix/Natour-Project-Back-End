@@ -109,7 +109,12 @@ const tourSchema = new mongoose.Schema(
     ],
     //Embeded document object needs to be inside an array
     // guides: Array, **For Embedding user in the tours document
-    /** */
+
+    /**let's now use a process called populate in order to actually get access to the referenced
+     * tour guides whenever we query for a certain tour.
+     * We are going to use populate in order to basically replae the fields that we referenced
+     * with the actual related data. The result of that will look as though the data has always been embedded.
+     */
     guides: [
       {
         type: mongoose.Schema.ObjectId,
@@ -162,6 +167,18 @@ tourSchema.pre(/^find/, function (next) {
   //the this keyword will point to the query not the tourSchema object
   this.find({ secretTour: { $ne: true } });
   this.start = Date.now();
+  next();
+});
+
+//this function will populate the guides field for every find()
+tourSchema.pre(/^find/, function (next) {
+  //populate: specifies paths which should be populated with other documents.
+  //Paths are populated after the query executes and a response is received.
+  //to specifie fileds you want to exclude or include pass in an object like so
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
   next();
 });
 

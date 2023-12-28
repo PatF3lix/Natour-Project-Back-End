@@ -82,6 +82,31 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    startLocation: {
+      //GeoJSOn
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    //Embeded document object needs to be inside an array
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
   },
   {
     //in order to showcase virtual fields in output
@@ -135,6 +160,6 @@ tourSchema.pre('aggregation', function (next) {
   next();
 });
 
-const Tour = mongoose.model('Tours-simple', tourSchema);
+const Tour = mongoose.model('Tours', tourSchema);
 
 module.exports = Tour;

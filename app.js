@@ -8,6 +8,8 @@ const helmet = require('helmet');
 const mongoSanitizer = require('express-mongo-sanitize');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const xss = require('xss-clean');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const hpp = require('hpp');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const AppError = require('./utils/appError');
@@ -45,6 +47,20 @@ app.use(mongoSanitizer);
 
 //data Sanitization agaisnt xss
 app.use(xss());
+
+//prevent parameter pollution
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
+  }),
+);
 
 //Serving Static files
 app.use(express.static(`${__dirname}/public`));

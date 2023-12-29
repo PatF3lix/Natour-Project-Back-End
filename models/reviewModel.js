@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Tour = require('./tourModel');
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -51,6 +52,64 @@ reviewSchema.pre(/^find/, function (next) {
     select: 'name',
   });
   next();
+});
+
+//created a static method to calculate the average and number of ratings for the tour ID
+reviewSchema.statics.calcAverageRatings = async function (tourId) {
+  const stats = await this.aggregate([
+    {
+      $match: { tour: tourId },
+    },
+    {
+      //group together all reviews that have matching tour id
+      //then calculate the sum and store it in nRatings
+      //then calculate the averageRating of these reviews and store the result in avgRating
+      $group: {
+        _id: '$tour',
+        nRatings: { $num: 1 },
+        avgRating: { $avg: '$rating' },
+      },
+    },
+  ]);
+
+  //2) find current tour then update it, "saved stats to current tour"
+  if (stats.length > 0) {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: stats[0].nRating,
+      ratingsAverage: stats[0].avgRating,
+    });
+  } else {
+    //default values
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: 0,
+      ratingsAverage: 4.5,
+    });
+  }
+};
+
+//this middlware is used, to calculate the tour rating after every post review by a user
+//once a review is saved into the db, it will then calculate the average
+reviewSchema.post('save', function () {
+  //In order to use this function, we called it after a new Review has been created,
+  //for that we need to use this.constructor, vecause this is what point to the current model.
+  this.constructor.calcAverageRatings(this.tour);
+});
+
+/**both following middleware function are implemented for:
+ * findByIdAndUpdate &
+ * findByIdAndDelete
+ */
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  //saving the tour id to the document, in order to use it in the following post function
+  this.r = await this.findOne();
+  console.log(this.r);
+  next();
+});
+
+reviewSchema.post(/^findOneAnd/, async function () {
+  // does not work here, query has already executed
+  // this.r = await this.findOne();
+  await this.r.constructor.calcAverageRatings(this.r.tour);
 });
 
 const Review = mongoose.model('Review', reviewSchema);

@@ -129,6 +129,19 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
+/**We can create indexes on specific fields in a collection,
+ * for ex. mongo automatically creates an index for id field by default
+ * this id index is basically and ordered list of all the IDs that get stored somewhere
+ * outside of the collection
+ * Whenever documents are queried by the ID MongoDB will search that ordered index
+ * instead of searching through the whole collection and look at all the documents one by one
+ * which is much slower, with indexes this becomes much more efficient.
+ * Create indexess of fields users query most frequently.
+ */
+//1 stand for ascending, -1 for descending order
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+
 //virtual property
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;

@@ -76,6 +76,11 @@ userSchema.pre('save', async function (next) {
   //only run this function if password was actually modified
   if (!this.isModified('password')) return next();
 
+  if (process.env.NODE_ENV === 'LOADER') {
+    this.isNew = true;
+    return next();
+  }
+
   //Hash the password with cost of 12
   this.password = await bcrypt.hash(this.password, 12);
 

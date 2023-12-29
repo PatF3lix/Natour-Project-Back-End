@@ -1,13 +1,6 @@
 const Tour = require('../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
-//middleware
-exports.aliasTopTours = (req, res, next) => {
-  req.query.limit = '5';
-  req.query.sort = '-ratingsAverage, price';
-  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
-  next();
-};
 
 //Route Handlers
 exports.getAllTours = factory.getAll(Tour);
@@ -15,6 +8,13 @@ exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 exports.addTour = factory.createOne(Tour);
 exports.updateTour = factory.updateOne(Tour);
 exports.deleteTour = factory.deleteOne(Tour);
+
+exports.aliasTopTours = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage, price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
 
 exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([

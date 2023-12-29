@@ -6,13 +6,14 @@ const authController = require('../controllers/authController');
 // the parameters
 const router = express.Router({ mergeParams: true });
 
+router.use(authController.protect);
+
 router
   //But here, in this route, so in this URL, for this post, there's no tour id,
   //but we still want to get access to the tour id that is declared in the tour router previously
   .route('/')
-  .get(authController.protect, controller.getAllReviews)
+  .get(controller.getAllReviews)
   .post(
-    authController.protect,
     authController.restrictTo('user'),
     controller.setTourUserIds,
     controller.createReview,
@@ -21,7 +22,7 @@ router
 router
   .route('/:id')
   .get(controller.getReview)
-  .patch(controller.updateReview)
-  .delete(controller.deleteReview);
+  .patch(authController.restrictTo('user', 'admin'), controller.updateReview)
+  .delete(authController.restrictTo('user', 'admin'), controller.deleteReview);
 
 module.exports = router;

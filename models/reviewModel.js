@@ -34,6 +34,9 @@ const reviewSchema = new mongoose.Schema(
   },
 );
 
+//1 unique review per user for each tour, a user will not be able to create 2 reviews for the same tour.
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 //this function will populate the guides field for every find()
 reviewSchema.pre(/^find/, function (next) {
   //populate: specifies paths which should be populated with other documents.

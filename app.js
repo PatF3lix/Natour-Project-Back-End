@@ -87,14 +87,15 @@ const rootRoute = '/api/v1';
 const toursRoute = '/tours';
 const usersRoute = '/users';
 const reviewsRoute = '/reviews';
-const overviewRoute = '/overview';
+const overviewRoute = '/';
 const tourDetailsRoute = '/tour';
 
 //mounting routers
+//Api Routes
 app.use(`${rootRoute}${toursRoute}`, tourRouter);
 app.use(`${rootRoute}${usersRoute}`, userRouter);
 app.use(`${rootRoute}${reviewsRoute}`, reviewRouter);
-app.use(`/`, viewRouter);
+//Web pages Routes
 app.use(`${overviewRoute}`, viewRouter);
 app.use(`${tourDetailsRoute}`, viewRouter);
 

@@ -14,6 +14,7 @@ const hpp = require('hpp');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
@@ -86,18 +87,16 @@ const rootRoute = '/api/v1';
 const toursRoute = '/tours';
 const usersRoute = '/users';
 const reviewsRoute = '/reviews';
-
-app.get('/', (req, res) => {
-  res.status(200).render('base', {
-    tour: 'Forest Hiker',
-    user: 'Patrick',
-  });
-});
+const overviewRoute = '/overview';
+const tourDetailsRoute = '/tour';
 
 //mounting routers
 app.use(`${rootRoute}${toursRoute}`, tourRouter);
 app.use(`${rootRoute}${usersRoute}`, userRouter);
 app.use(`${rootRoute}${reviewsRoute}`, reviewRouter);
+app.use(`/`, viewRouter);
+app.use(`${overviewRoute}`, viewRouter);
+app.use(`${tourDetailsRoute}`, viewRouter);
 
 /*handling all routes that are not created in this api, in order to return a json object,
 in case the user type in a route that doesn't exist.

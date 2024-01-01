@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -20,7 +21,14 @@ const globalErrorHandler = require('./controllers/errorController');
  * to make the application */
 const app = express();
 
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
 //**Global middeware */
+//Serving Static files
+//we basically define that all the static assets will always automatically be served
+//from a folder called public
+app.use(express.static(path.join(__dirname, 'public')));
 
 //Set Security http headers
 app.use(helmet());
@@ -63,9 +71,6 @@ app.use(
   }),
 );
 
-//Serving Static files
-app.use(express.static(`${__dirname}/public`));
-
 // app.use((req, res, next) => {
 //   console.log('Hello from the middleware :D');
 //   next();
@@ -81,6 +86,13 @@ const rootRoute = '/api/v1';
 const toursRoute = '/tours';
 const usersRoute = '/users';
 const reviewsRoute = '/reviews';
+
+app.get('/', (req, res) => {
+  res.status(200).render('base', {
+    tour: 'Forest Hiker',
+    user: 'Patrick',
+  });
+});
 
 //mounting routers
 app.use(`${rootRoute}${toursRoute}`, tourRouter);

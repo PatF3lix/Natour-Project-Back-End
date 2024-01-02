@@ -122,6 +122,32 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
+//only for rendered pages no erros!
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  if (req.cookies.jwt) {
+    //1) verify token
+    const decoded = await promisify(jwt.verify)(
+      req.cookies.jwt,
+      process.env.JWT_SECRET,
+    );
+
+    //2) check if user still exists
+    const freshUser = await User.findById(decoded.id);
+    if (!freshUser) return next();
+
+    //3) check if user changed password after the token was issued
+    //iat is the jwt timestamp
+    if (await freshUser.changedPasswordAfter(decoded.iat)) {
+      return next();
+    }
+    //THERE IS A LOGGED IN USER
+    //pug templates will get access to the following variable in locals
+    res.locals.user = freshUser;
+    return next();
+  }
+  next();
+});
+
 /*Since we cannot pass argument to a middleware function,
 we wrap that function within a function, giving it access to the roles variable
 due to closure.*/

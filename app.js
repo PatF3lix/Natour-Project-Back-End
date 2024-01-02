@@ -1,16 +1,15 @@
+/* eslint-disable */
+
 const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const rateLimit = require('express-rate-limit');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const helmet = require('helmet');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const mongoSanitizer = require('express-mongo-sanitize');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const xss = require('xss-clean');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
+
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
@@ -32,7 +31,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 //Set Security http headers
-const scriptSrcUrls = ['https://unpkg.com/', 'https://tile.openstreetmap.org'];
+const scriptSrcUrls = [
+  'https://unpkg.com/',
+  'https://tile.openstreetmap.org',
+  'https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.3/axios.min.js',
+];
 const styleSrcUrls = [
   'https://unpkg.com/',
   'https://tile.openstreetmap.org',
@@ -45,14 +48,15 @@ const fontSrcUrls = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
-      defaultSrc: [],
+      defaultSrc: ["'self'"],
       connectSrc: ["'self'", ...connectSrcUrls],
       scriptSrc: ["'self'", ...scriptSrcUrls],
       styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
       workerSrc: ["'self'", 'blob:'],
-      objectSrc: [],
+      objectSrc: ["'none'"],
       imgSrc: ["'self'", 'blob:', 'data:', 'https:'],
-      fontSrc: ["'self'", ...fontSrcUrls],
+      fontSrc: ["'self'", 'https:', 'data:', ...fontSrcUrls],
+      upgradeInsecureRequests: [],
     },
   }),
 );
@@ -73,6 +77,8 @@ app.use('/api', limiter);
 
 //body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
+//parses data from cookie
+app.use(cookieParser());
 
 //Data Sanitization agaisnt noSql query injection
 //install express-mongo-sanitize & xss-clean
@@ -103,6 +109,7 @@ app.use(
 //Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  console.log(req.cookies);
   next();
 });
 

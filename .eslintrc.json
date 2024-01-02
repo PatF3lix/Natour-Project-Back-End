@@ -16,5 +16,9 @@
     "prefer-destructuring": ["error", { "object": true, "array": false }],
     "no-unused-vars": ["error", { "argsIgnorePattern": "req|res|next|val" }],
     "import/no-extraneous-dependencies": ["error", { "devDependencies": true }]
+  },
+  "parserOptions": {
+    "ecmaVersion": 11,
+    "sourceType": "module"
   }
 }

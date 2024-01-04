@@ -14,9 +14,9 @@ router.patch('/resetPassword/:token', authController.resetPassword);
 router.use(authController.protect);
 
 router.patch('/updateMe', controller.updateMe);
-router.get('/me', controller.getMe, controller.getUser);
-router.patch('/deleteMe', controller.deleteMe);
 router.patch('/updatePassword', authController.updatePassword);
+router.patch('/deleteMe', controller.deleteMe);
+router.get('/me', controller.getMe, controller.getUser);
 
 //the following routes should only be used by administrators
 router.use(authController.restrictTo('admin'));

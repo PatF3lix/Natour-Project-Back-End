@@ -41,6 +41,26 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 
+/**how to log out the user's and keeping the jwt token ?
+ * because usually with jwt authentication we just delete the cookie or the token from local storage
+ * but not possible when using it as we are currently.
+ * what we will do instead is create a very simple log out route that will simply
+ * send back a new cookie with the exact same name but without the token
+ * That will then override the current cookie that we have in the browser with one that has the same name.
+ * but no token, and so when that cookie is then sent along with the next request, then we will not be able to identify
+ * the user as being logged in. This will affectively then log out the user.
+ * clever work around to solve the problem that we cannot manipulate the cookie in the browser and delete it.
+ *
+ */
+
+exports.logOut = (req, res) => {
+  res.cookie('jwt', 'logged_out', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: 'success' });
+};
+
 //post request
 exports.signUp = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
@@ -124,6 +144,8 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 //only for rendered pages no erros!
 exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  if (req.cookies.jwt === 'logged_out') return next();
+
   if (req.cookies.jwt) {
     //1) verify token
     const decoded = await promisify(jwt.verify)(

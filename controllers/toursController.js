@@ -1,7 +1,69 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+const multer = require('multer');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const sharp = require('sharp');
 const Tour = require('../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 const AppError = require('../utils/appError');
+
+const multerStorage = multer.memoryStorage();
+
+//this filter only permits images to be uploaded
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
+  }
+};
+
+//must install multer
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+//for multiple file uploads, different fields
+exports.uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 },
+]);
+
+//upload.single('image) -> for a single image 'req.file'
+//upload.array('images', 5) -> for multiple of the same image 'req.files'
+
+exports.resizeTourImages = catchAsync(async (req, res, next) => {
+  if (req.files.imageCover || !req.files.images) return next();
+
+  req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+  //1) coverImage
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${req.body.imageCover}`);
+
+  //2) Images
+  req.body.images = [];
+
+  //necessary because .map(async) does not stop the code exectution and goes directly to the next middleware
+  //this is why we use Promise.all(to execute the array of all promises)
+  await Promise.all(
+    req.files.images.map(async (file, i) => {
+      const filename = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+
+      await sharp(file.buffer)
+        .resize(2000, 1333)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(`public/img/tours/${filename}`);
+
+      req.body.images.push(filename);
+    }),
+  );
+  next();
+});
 
 //Route Handlers
 exports.getAllTours = factory.getAll(Tour);

@@ -12027,7 +12027,7 @@ var logOut = exports.logOut = /*#__PURE__*/function () {
         case 3:
           res = _context2.sent;
           //reload browser
-          if (res.data.status = 'success') location.reload(true);
+          if (res.data.status = 'success') location.assign('/');
           _context2.next = 10;
           break;
         case 7:
@@ -12302,7 +12302,9 @@ if (loginForm) {
   });
 }
 if (logOutBtn) {
-  logOutBtn.addEventListener('click', _login.logOut);
+  logOutBtn.addEventListener('click', function (e) {
+    (0, _login.logOut)();
+  });
 }
 if (userform) {
   userform.addEventListener('submit', function (e) {

@@ -26,7 +26,9 @@ if (loginForm) {
 }
 
 if (logOutBtn) {
-  logOutBtn.addEventListener('click', logOut);
+  logOutBtn.addEventListener('click', (e) => {
+    logOut();
+  });
 }
 
 if (userform) {

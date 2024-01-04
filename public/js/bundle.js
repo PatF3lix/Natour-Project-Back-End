@@ -12302,40 +12302,30 @@ if (loginForm) {
   });
 }
 if (logOutBtn) {
-  logOutBtn.addEventListener('click', function (e) {
-    (0, _login.logOut)();
-  });
+  logOutBtn.addEventListener('click', _login.logOut);
 }
 if (userform) {
-  userform.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var name = document.getElementById('name').value;
-    var email = document.getElementById('email').value;
-    (0, _updateSettings.updateSettings)('data', {
-      name: name,
-      email: email
-    });
-  });
-}
-if (passwForm) {
-  passwForm.addEventListener('submit', /*#__PURE__*/function () {
+  userform.addEventListener('submit', /*#__PURE__*/function () {
     var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-      var currentPassword, newPassword, newPasswordConfirm;
+      var form;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
             e.preventDefault();
-            document.querySelector('.btn--save-password').textContent = 'Updating..';
-            currentPassword = document.getElementById('password-current').value;
-            newPassword = document.getElementById('password').value;
-            newPasswordConfirm = document.getElementById('password-confirm').value;
-            _context.next = 7;
-            return (0, _updateSettings.updateSettings)('password', {
-              currentPassword: currentPassword,
-              newPassword: newPassword,
-              newPasswordConfirm: newPasswordConfirm
-            });
-          case 7:
+            document.querySelector('.btn--save-settings').textContent = 'Updating..';
+            form = new FormData();
+            form.append('name', document.getElementById('name').value);
+            form.append('email', document.getElementById('email').value);
+            form.append('photo', document.getElementById('photo').files[0]);
+            console.log(form);
+            _context.next = 9;
+            return (0, _updateSettings.updateSettings)('data', form);
+          case 9:
+            window.setTimeout(function () {
+              location.reload();
+              document.querySelector('.btn--save-settings').textContent = 'Save Settings';
+            }, 1500);
+          case 10:
           case "end":
             return _context.stop();
         }
@@ -12345,7 +12335,36 @@ if (passwForm) {
       return _ref.apply(this, arguments);
     };
   }());
-  document.querySelector('.btn--save-password').textContent = 'Save password';
+}
+if (passwForm) {
+  passwForm.addEventListener('submit', /*#__PURE__*/function () {
+    var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(e) {
+      var currentPassword, newPassword, newPasswordConfirm;
+      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
+          case 0:
+            e.preventDefault();
+            document.querySelector('.btn--save-password').textContent = 'Updating..';
+            currentPassword = document.getElementById('password-current').value;
+            newPassword = document.getElementById('password').value;
+            newPasswordConfirm = document.getElementById('password-confirm').value;
+            _context2.next = 7;
+            return (0, _updateSettings.updateSettings)('password', {
+              currentPassword: currentPassword,
+              newPassword: newPassword,
+              newPasswordConfirm: newPasswordConfirm
+            });
+          case 7:
+          case "end":
+            return _context2.stop();
+        }
+      }, _callee2);
+    }));
+    return function (_x2) {
+      return _ref2.apply(this, arguments);
+    };
+  }());
+  document.querySelector('.btn--save-password').textContent = 'Save Password';
   document.getElementById('password-current').value = '';
   document.getElementById('password').value = '';
   document.getElementById('password-confirm').value = '';

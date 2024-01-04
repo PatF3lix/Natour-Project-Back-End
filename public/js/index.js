@@ -26,20 +26,25 @@ if (loginForm) {
 }
 
 if (logOutBtn) {
-  logOutBtn.addEventListener('click', (e) => {
-    logOut();
-  });
+  logOutBtn.addEventListener('click', logOut);
 }
 
 if (userform) {
-  userform.addEventListener('submit', (e) => {
+  userform.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    updateSettings('data', {
-      name,
-      email,
-    });
+    document.querySelector('.btn--save-settings').textContent = 'Updating..';
+    const form = new FormData();
+    form.append('name', document.getElementById('name').value);
+    form.append('email', document.getElementById('email').value);
+    form.append('photo', document.getElementById('photo').files[0]);
+    console.log(form);
+    await updateSettings('data', form);
+
+    window.setTimeout(() => {
+      location.reload();
+      document.querySelector('.btn--save-settings').textContent =
+        'Save Settings';
+    }, 1500);
   });
 }
 
@@ -58,7 +63,7 @@ if (passwForm) {
     });
   });
 
-  document.querySelector('.btn--save-password').textContent = 'Save password';
+  document.querySelector('.btn--save-password').textContent = 'Save Password';
   document.getElementById('password-current').value = '';
   document.getElementById('password').value = '';
   document.getElementById('password-confirm').value = '';

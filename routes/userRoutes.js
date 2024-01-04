@@ -13,8 +13,8 @@ router.patch('/resetPassword/:token', authController.resetPassword);
 //protect all the routes, after this point, middleware is run in sequence
 router.use(authController.protect);
 
-router.get('/me', controller.getMe, controller.getUser);
 router.patch('/updateMe', controller.updateMe);
+router.get('/me', controller.getMe, controller.getUser);
 router.patch('/deleteMe', controller.deleteMe);
 router.patch('/updatePassword', authController.updatePassword);
 

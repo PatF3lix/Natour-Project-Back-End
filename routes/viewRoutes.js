@@ -16,6 +16,7 @@ router.get(
 );
 router.get('/tour/:slug', controller.getTourDetails);
 router.get('/login', controller.getLoginForm);
+router.get('/my-tours', authController.protect, controller.getMyTours);
 
 router.post(
   '/submit-user-data',

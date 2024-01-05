@@ -6,7 +6,7 @@ const Tour = require('../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
 
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
-  const stripe = Stripe(process.env.STRIPE_API_KEY);
+  const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
   //1) get the currently booked tour
   const tour = await Tour.findById(req.params.tourId);
   //2) Create checkout session

@@ -31,33 +31,54 @@ app.set('views', path.join(__dirname, 'views'));
 //from a folder called public
 app.use(express.static(path.join(__dirname, 'public')));
 
-//Set Security http headers
 const scriptSrcUrls = [
   'https://unpkg.com/',
-  'https://tile.openstreetmap.org',
-  'https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.3/axios.min.js',
+  'https://tile.openstreetmap.org/',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js',
+  'http://127.0.0.1:3000/api/v1/users/login',
+  'https://cdnjs.cloudflare.com',
+  'https://js.stripe.com/v3/',
+  'https://js.stripe.com/',
 ];
+const framesSrcUrls = ['https://js.stripe.com/'];
 const styleSrcUrls = [
   'https://unpkg.com/',
-  'https://tile.openstreetmap.org',
+  'https://tile.openstreetmap.org/',
   'https://fonts.googleapis.com/',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
 ];
-const connectSrcUrls = ['https://unpkg.com', 'https://tile.openstreetmap.org'];
+const connectSrcUrls = [
+  'https://unpkg.com/',
+  'https://tile.openstreetmap.org/',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js',
+  'http://127.0.0.1:3000/api/v1/users/login',
+  'https://cdnjs.cloudflare.com',
+  'ws://localhost:56331/',
+  'https://js.stripe.com/v3/',
+  'https://js.stripe.com/',
+];
 const fontSrcUrls = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
-//set security http headers
+// app.use(cors());
+// app.options('*', cors());
+
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
-      defaultSrc: ["'self'"],
+      defaultSrc: [],
       connectSrc: ["'self'", ...connectSrcUrls],
       scriptSrc: ["'self'", ...scriptSrcUrls],
       styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
       workerSrc: ["'self'", 'blob:'],
-      objectSrc: ["'none'"],
+      objectSrc: [],
       imgSrc: ["'self'", 'blob:', 'data:', 'https:'],
-      fontSrc: ["'self'", 'https:', 'data:', ...fontSrcUrls],
-      upgradeInsecureRequests: [],
+      fontSrc: ["'self'", ...fontSrcUrls],
+      frameSrc: ["'self'", ...framesSrcUrls],
     },
   }),
 );

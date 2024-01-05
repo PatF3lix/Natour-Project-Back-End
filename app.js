@@ -14,6 +14,7 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const viewRouter = require('./routes/viewRoutes');
+const bookingRouter = require('./routes/bookingRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
@@ -117,6 +118,7 @@ const rootRoute = '/api/v1';
 const toursRoute = '/tours';
 const usersRoute = '/users';
 const reviewsRoute = '/reviews';
+const bookings = '/bookings';
 const overviewRoute = '/';
 const tourDetailsRoute = '/tour';
 
@@ -125,6 +127,7 @@ const tourDetailsRoute = '/tour';
 app.use(`${rootRoute}${toursRoute}`, tourRouter);
 app.use(`${rootRoute}${usersRoute}`, userRouter);
 app.use(`${rootRoute}${reviewsRoute}`, reviewRouter);
+app.use(`${rootRoute}${bookings}`, bookingRouter);
 //Web pages Routes
 app.use(`${overviewRoute}`, viewRouter);
 app.use(`${tourDetailsRoute}`, viewRouter);

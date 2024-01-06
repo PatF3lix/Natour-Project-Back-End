@@ -10,6 +10,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const cors = require('cors');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -65,8 +66,10 @@ const connectSrcUrls = [
 ];
 const fontSrcUrls = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
-// app.use(cors());
-// app.options('*', cors());
+//enable cross-origin resources sharing for our entire api
+app.use(cors());
+app.options('*', cors());
+//Access-Control-Allow-Origin to all (*)
 
 app.use(
   helmet.contentSecurityPolicy({

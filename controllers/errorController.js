@@ -46,8 +46,6 @@ const sendErrorProd = (err, req, res) => {
       msg: err.message,
     });
   } else {
-    //Programming or other unkown error: don't leak error details
-    //1) log error
     console.error('ERROR!', err);
     res.status(err.statusCode).render('error', {
       title: 'Something went wrong!',
@@ -63,13 +61,11 @@ const handleCastErrorDB = (err) => {
 
 const handleDuplicateFieldsDB = (err) => {
   const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
-  //   console.log(value);
   const message = `Duplicate field value: ${value}. Please use another value!`;
   return new AppError(message, 400);
 };
 
 const handleValidationErrorDB = (err) => {
-  //to loop over and ovject we use object.values
   const errors = Object.values(err.errors).map((el) => el.message);
   const message = `Invalid input data. ${errors.join('. ')}`;
   return new AppError(message, 400);
@@ -82,8 +78,7 @@ const handleExpiredJWT = () =>
   new AppError('Your token has expired! Please log in again', 401);
 
 module.exports = (err, req, res, next) => {
-  // console.log(err.stack)
-  err.statusCode = err.statusCode || 500; //means internal server error
+  err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {

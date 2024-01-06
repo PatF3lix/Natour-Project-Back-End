@@ -1,9 +1,5 @@
 const mongoose = require('mongoose');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const slugify = require('slugify');
-// eslint-disable-next-line import/no-extraneous-dependencies
-// const validator = require('validator');
-// const User = require('./userModel'); only necessary for embedding user objects in tours document
 
 const tourSchema = new mongoose.Schema(
   {
@@ -14,7 +10,6 @@ const tourSchema = new mongoose.Schema(
       trim: true,
       maxlength: [40, 'S tour name must have less or equal to 40 characters'],
       minlength: [10, 'S tour name must have less or equal to 10 characters'],
-      // validate: [validator.isAlpha, 'Tour name must only contain characters'], exemple
     },
     slug: String,
     duration: {
@@ -45,8 +40,7 @@ const tourSchema = new mongoose.Schema(
       //custom validator
       validate: {
         validator: function (val) {
-          //will only work with create, not with update
-          return val < this.price; // 100 < 200
+          return val < this.price;
         },
         message: 'Discount price ({VALUE}) should be below regular price',
       },
@@ -76,7 +70,6 @@ const tourSchema = new mongoose.Schema(
     createdAt: {
       type: Date,
       default: Date.now(),
-      //in order to exclude fields, put the select property to false, like below
       select: false,
     },
     startDates: [Date],
@@ -108,14 +101,6 @@ const tourSchema = new mongoose.Schema(
         day: Number,
       },
     ],
-    //Embeded document object needs to be inside an array
-    // guides: Array, **For Embedding user in the tours document
-
-    /**let's now use a process called populate in order to actually get access to the referenced
-     * tour guides whenever we query for a certain tour.
-     * We are going to use populate in order to basically replae the fields that we referenced
-     * with the actual related data. The result of that will look as though the data has always been embedded.
-     */
     guides: [
       {
         type: mongoose.Schema.ObjectId,
@@ -130,15 +115,6 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
-/**We can create indexes on specific fields in a collection,
- * for ex. mongo automatically creates an index for id field by default
- * this id index is basically and ordered list of all the IDs that get stored somewhere
- * outside of the collection
- * Whenever documents are queried by the ID MongoDB will search that ordered index
- * instead of searching through the whole collection and look at all the documents one by one
- * which is much slower, with indexes this becomes much more efficient.
- * Create indexess of fields users query most frequently.
- */
 //1 stand for ascending, -1 for descending order
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
@@ -153,65 +129,31 @@ tourSchema.virtual('durationWeeks').get(function () {
 //virtual populate
 tourSchema.virtual('reviews', {
   ref: 'Review',
-  //this references the field inside the review model
   foreignField: 'tour',
-  //this references the field inside the tour model
   localField: '_id',
 });
 
-//DOCUMENT MIDDLEWARE: runs before .save() and .create()
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
 
-//**For embedding users in the tours document */
-// tourSchema.pre('save', async function (next) {
-//   //the result of async (id) => await User.findById(id) will be promises ;
-//   const guidesPromises = this.guides.map(async (id) => await User.findById(id));
-//   //in order to retrieve the data from these promises we use await Promise.all() to fetch the data;
-//   this.guides = await Promise.all(guidesPromises);
-//   next();
-// });
-
-// tourSchema.pre('save', (next) => {
-//   console.log('Will save document...');
-//   next();
-// });
-
-// tourSchema.post('save', (doc, next) => {
-//   console.log(doc);
-//   next();
-// });
-
-//QUERY MIDDLEWARE
-// '/^find/' is a regular expression which will permits this function to trigger
-// not only for '.find()', but also for all func starting with find:
-//'.findOne(), .findOneAndDelete, .findOneAndUpdate, etc..'
+/*'/^find/' is a regular expression which will permits this function to trigger
+not only for '.find()', but also for all func starting with find:
+'.findOne(), .findOneAndDelete, .findOneAndUpdate, etc..'*/
 tourSchema.pre(/^find/, function (next) {
-  //the this keyword will point to the query not the tourSchema object
   this.find({ secretTour: { $ne: true } });
   this.start = Date.now();
   next();
 });
 
-//this function will populate the guides field for every find()
 tourSchema.pre(/^find/, function (next) {
-  //populate: specifies paths which should be populated with other documents.
-  //Paths are populated after the query executes and a response is received.
-  //to specifie fileds you want to exclude or include pass in an object like so
   this.populate({
     path: 'guides',
     select: '-__v -passwordChangedAt',
   });
   next();
 });
-
-// tourSchema.post(/^find/, function (docs, next) {
-//   console.log(`Query took ${Date.now() - this.start} milliseconds!`);
-//   // console.log(docs);
-//   next();
-// });
 
 //AGGREGATION MIDDLEWARE
 //exclude the secret tours from output using aggregation middle ware

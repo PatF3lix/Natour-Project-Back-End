@@ -1,6 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 const multer = require('multer');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const sharp = require('sharp');
 const Tour = require('../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
@@ -9,7 +7,6 @@ const AppError = require('../utils/appError');
 
 const multerStorage = multer.memoryStorage();
 
-//this filter only permits images to be uploaded
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image')) {
     cb(null, true);
@@ -30,9 +27,6 @@ exports.uploadTourImages = upload.fields([
   { name: 'images', maxCount: 3 },
 ]);
 
-//upload.single('image) -> for a single image 'req.file'
-//upload.array('images', 5) -> for multiple of the same image 'req.files'
-
 exports.resizeTourImages = catchAsync(async (req, res, next) => {
   if (req.files.imageCover || !req.files.images) return next();
 
@@ -47,8 +41,6 @@ exports.resizeTourImages = catchAsync(async (req, res, next) => {
   //2) Images
   req.body.images = [];
 
-  //necessary because .map(async) does not stop the code exectution and goes directly to the next middleware
-  //this is why we use Promise.all(to execute the array of all promises)
   await Promise.all(
     req.files.images.map(async (file, i) => {
       const filename = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
@@ -110,9 +102,6 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
 
 exports.getMontlyPlan = catchAsync(async (req, res, next) => {
   const year = req.params.year * 1;
-  /**what unwind is going to do is basically deconstruct an array field from the info documents
-   * and then output one document for each of the array.
-   */
   const plan = await Tour.aggregate([
     {
       $unwind: '$startDates',
@@ -156,11 +145,8 @@ exports.getMontlyPlan = catchAsync(async (req, res, next) => {
 exports.getToursWithin = catchAsync(async (req, res, next) => {
   const { distance, latlng, unit } = req.params;
   const [lat, lng] = latlng.split(',');
-
-  //what is the radius of the earth in miles? 3963.2,
-  //what is the radius of the earth in km? 6378.1
-  //how to you obtain the radian ? by dividing the distance by the radius of the earth
   const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
   if (!lat || !lng) {
     next(
       new AppError(
@@ -170,7 +156,6 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
     );
   }
 
-  //what does $geoWithin do ?
   const tours = await Tour.find({
     startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
   });

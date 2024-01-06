@@ -3,7 +3,6 @@ const Tour = require('../models/tourModel');
 const User = require('../models/userModel');
 const Booking = require('../models/bookingModel');
 const AppError = require('../utils/appError');
-// const Review = require('../models/reviewModel');
 
 exports.getOverview = catchAsync(async (req, res, next) => {
   //1) Get tour data from collection
@@ -66,7 +65,6 @@ exports.updateUserData = catchAsync(async (req, res) => {
   });
 });
 
-//You could very well use populate, this will coded this wway to demonstrate
 exports.getMyTours = catchAsync(async (req, res) => {
   // 1) Find all bookings
   const booking = await Booking.find({ user: req.user.id });

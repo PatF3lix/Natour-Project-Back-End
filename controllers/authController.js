@@ -1,6 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 const jwt = require('jsonwebtoken');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const crypto = require('crypto');
 const { promisify } = require('util');
 const User = require('../models/userModel');
@@ -13,9 +11,6 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
-/*a cookie is just a small piece of text that a server can send to clients.
-then when a client receives a cookie, it will automatically store it
-and then automatically send it back along with all future requests to the same server.*/
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
   const cookieOptions = {
@@ -25,13 +20,9 @@ const createSendToken = (user, statusCode, res) => {
     httpOnly: true,
   };
 
-  //sending cookie
   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
   res.cookie('jwt', token, cookieOptions);
-
-  //remove password from output
   user.passwrod = undefined;
-
   res.status(statusCode).json({
     status: 'success',
     token,
@@ -41,18 +32,6 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 
-/**how to log out the user's and keeping the jwt token ?
- * because usually with jwt authentication we just delete the cookie or the token from local storage
- * but not possible when using it as we are currently.
- * what we will do instead is create a very simple log out route that will simply
- * send back a new cookie with the exact same name but without the token
- * That will then override the current cookie that we have in the browser with one that has the same name.
- * but no token, and so when that cookie is then sent along with the next request, then we will not be able to identify
- * the user as being logged in. This will affectively then log out the user.
- * clever work around to solve the problem that we cannot manipulate the cookie in the browser and delete it.
- *
- */
-
 exports.logOut = (req, res) => {
   res.cookie('jwt', 'logged_out', {
     expires: new Date(Date.now() + 10 * 1000),
@@ -61,7 +40,6 @@ exports.logOut = (req, res) => {
   res.status(200).json({ status: 'success' });
 };
 
-//post request
 exports.signUp = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -76,32 +54,21 @@ exports.signUp = catchAsync(async (req, res, next) => {
   createSendToken(newUser, 201, res);
 });
 
-//post request
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-
-  //1) check if email and password exist
   if (!email || !password) {
     return next(new AppError('Please provide email and password!', 400));
   }
 
-  //2) check if user exists && password is correct
-  //.select('+password'), is put there in order to output the password that was hidden in the model
   const user = await User.findOne({ email }).select('+password');
-
-  //this way if the user does not exist, return true on !user,
-  //it will not run the following code, and try o access a variable that may not exist like 'user.password'
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
   }
 
-  //3) if everything ok, send token to client
   createSendToken(user, 200, res);
 });
 
-//protect route from being exploited before user is logged in
 exports.protect = catchAsync(async (req, res, next) => {
-  //1) getting token and check if it exists
   let token;
   if (
     req.headers.authorization &&
@@ -109,29 +76,19 @@ exports.protect = catchAsync(async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(' ')[1];
   } else if (req.cookies.jwt) token = req.cookies.jwt;
+
   if (!token) {
-    // console.log(token);
     return next(
       new AppError('You are not logged in ! Please log in to get access.', 401),
     );
   }
-  //2) verification token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-
-  //3) check if user still exists
-  /** We do this so that we can be 100% sure that the iD is actually correct,
-   * because if we made it until this point of the code here then it means that the verification
-   * process, that we had previously, was successfull, Otherwise the following line of code
-   * would of caused an error which would then of provented the function from continuing.
-   */
   const freshUser = await User.findById(decoded.id);
   if (!freshUser)
     return next(
       new AppError('The user belonging to this token, no longer exists', 401),
     );
 
-  //4) check if user changed password after the token was issued
-  //iat is the jwt timestamp
   if (await freshUser.changedPasswordAfter(decoded.iat)) {
     return next(
       new AppError(
@@ -140,13 +97,11 @@ exports.protect = catchAsync(async (req, res, next) => {
       ),
     );
   }
-  //5) Grant access to protected route
-  req.user = freshUser; //maybe usefull at some point in future
+  req.user = freshUser;
   res.locals.user = freshUser;
   next();
 });
 
-//only for rendered pages no erros!
 exports.isLoggedIn = catchAsync(async (req, res, next) => {
   if (req.cookies.jwt === 'logged_out') return next();
 
@@ -167,7 +122,6 @@ exports.isLoggedIn = catchAsync(async (req, res, next) => {
       return next();
     }
     //THERE IS A LOGGED IN USER
-    //pug templates will get access to the following variable in locals
     res.locals.user = freshUser;
     return next();
   }
@@ -181,7 +135,6 @@ due to closure.*/
 exports.restrictTo =
   (...roles) =>
   (req, res, next) => {
-    //roles ['admin', 'lead-guide']; default=role='user'
     if (!roles.includes(req.user.role)) {
       return next(
         new AppError('You do not have permission to perform this action', 403),
@@ -191,7 +144,6 @@ exports.restrictTo =
   };
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-  //1) et user based on Posted email
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
     return next(
@@ -200,11 +152,8 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
   //2) Generate the random reset token
   const resetToken = user.createPasswordResetToken();
-  //to remove required fields from usermodel post request while using the save method
-  // set validateBeforeSave : false
   await user.save({ validateBeforeSave: false });
   //3) Send it to user's email
-
   try {
     const resetURL = `${req.protocol}://${req.get(
       'host',
@@ -216,7 +165,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
       message: 'Token sent to email!',
     });
   } catch (err) {
-    //this only modifies the data, but doesn't really save it.
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
@@ -234,27 +182,20 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     .createHash('sha256')
     .update(req.params.token)
     .digest('hex');
-
-  //verify if password token matches any hashedToken in db,
-  //and verify if the token has not expired
   const user = await User.findOne({
     passwordResetToken: hashedToken,
     passwordResetExpires: { $gt: Date.now() },
   });
-
   //2) If token has not expired, and there is user, set the new password
   if (!user) {
     return next(new AppError('Token is invalid or has expired', 400));
   }
-  //if we get here, the user has benn found and token is not expired , then we update
-  //and save the users info into the db
+  //3) Update changedPasswordAt property for the user
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
   await user.save();
-  //3) Update changedPasswordAt property for the user
-
   //4) Log the user in, send JWT
   createSendToken(user, 201, res);
 });

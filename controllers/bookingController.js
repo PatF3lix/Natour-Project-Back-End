@@ -1,9 +1,7 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 const Stripe = require('stripe');
 const Tour = require('../models/tourModel');
 const Booking = require('../models/bookingModel');
 const factory = require('./handlerFactory');
-// const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
@@ -41,8 +39,8 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   });
 });
 
+//** WARNING This is only temporary, because it's unsecure: everyone can make bookings without paying
 exports.createBookingCheckout = catchAsync(async (req, res, next) => {
-  // This is only temporary, because it's unsecure: everyone can make bookings without paying
   const { tour, user, price } = req.query;
   if (!tour || !user || !price) return next();
   await Booking.create({ tour, user, price });

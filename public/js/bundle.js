@@ -11525,8 +11525,6 @@ var hideAlert = exports.hideAlert = function hideAlert() {
   var el = document.querySelector('.alert');
   if (el) el.parentElement.removeChild(el);
 };
-
-//type is 'success' or 'error'
 var showAlert = exports.showAlert = function showAlert(type, msg) {
   hideAlert();
   var markup = "<div class=\"alert alert--".concat(type, "\">").concat(msg, "</div>");
@@ -11692,7 +11690,6 @@ var displayMap = exports.displayMap = /*#__PURE__*/function () {
           map = L.map('map', {
             zoomControl: false
           }); //to disable + - zoom
-          // var map = L.map('map', { zoomControl: false }).setView([31.111745, -118.113491], );
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             crossOrigin: ''
@@ -11745,7 +11742,6 @@ var bookTour = exports.bookTour = /*#__PURE__*/function () {
           //  sessionId: session.data.session.id,
           //});
 
-          //works as expected
           window.location.replace(session.data.session.url);
           _context.next = 11;
           break;

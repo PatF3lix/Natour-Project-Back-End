@@ -4,7 +4,6 @@ const app = require('./app');
 
 //uncaught Exceptions -- must be declared at the beginning of the file,
 //in order to really catch all possible unhandled erros
-
 process.on('uncaughtException', (err) => {
   console.log('UNCAUGHT EXCEPTION! Shutting down...');
   console.log(err.name, err.message);
@@ -38,13 +37,13 @@ mongoose
         process.exit(1);
       });
     });
-
-    process.on('SIGTERM', () => {
-      console.log('SIGTERM RECEIVED. shutting down grafeully');
-      server.close(() => {
-        console.log('Process terminated!');
-        process.exit(1);
-      });
-    });
   })
   .catch((err) => console.log(err));
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM RECEIVED. shutting down grafeully');
+  server.close(() => {
+    console.log('Process terminated!');
+    process.exit(1);
+  });
+});

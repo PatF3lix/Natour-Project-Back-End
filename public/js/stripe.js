@@ -9,7 +9,6 @@ export const bookTour = async (tourId) => {
     //  sessionId: session.data.session.id,
     //});
 
-    //works as expected
     window.location.replace(session.data.session.url);
   } catch (err) {
     console.log(err);

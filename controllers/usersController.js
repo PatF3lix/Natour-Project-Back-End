@@ -1,6 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 const multer = require('multer');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const sharp = require('sharp');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
@@ -13,20 +11,7 @@ exports.getMe = (req, res, next) => {
   next();
 };
 
-//configure how the file will be stored, in this case the destination
-//it will be saved to, and the name we will save it as.
-//** cb stands for callback function
-// const multerStorage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, 'public/img/users');
-//   },
-//   filename: (req, file, cb) => {
-//     //user-id-currentimestamp.extention (.jpeg, etc)
-//     const ext = file.mimetype.split('/')[1];
-//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
-//   },
-// });
-//** this way the image will be stored as a buffer
+// this way the image will be stored as a buffer
 const multerStorage = multer.memoryStorage();
 
 //this filter only permits images to be uploaded
@@ -81,8 +66,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   //2) filter body object in order to update only certain fields
   const filteredBody = filterObj(req.body, 'name', 'email');
-  //adding photo property to filtered object, in order to update user photo file reference
-  //in the database
   if (req.file) filteredBody.photo = req.file.filename;
 
   //3) find user by idandUpdate

@@ -28,28 +28,17 @@ const reviewSchema = new mongoose.Schema(
     },
   },
   {
-    //in order to showcase virtual fields, that are not in the db but calculated during runtime in output
+    //in order to showcase virtual fields, that are not in the db but calculated
+    //during runtime in output
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },
 );
 
-//1 unique review per user for each tour, a user will not be able to create 2 reviews for the same tour.
 reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
 
 //this function will populate the guides field for every find()
 reviewSchema.pre(/^find/, function (next) {
-  //populate: specifies paths which should be populated with other documents.
-  //Paths are populated after the query executes and a response is received.
-  //to specifie fileds you want to exclude or include pass in an object like so
-  //   this.populate({
-  //     path: 'user',
-  //     select: 'name',
-  //   }).populate({
-  //     path: 'tour',
-  //     select: '-guides name photo',
-  //   });
-
   this.populate({
     path: 'user',
     select: 'name, photo',
@@ -64,9 +53,6 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
       $match: { tour: tourId },
     },
     {
-      //group together all reviews that have matching tour id
-      //then calculate the sum and store it in nRatings
-      //then calculate the averageRating of these reviews and store the result in avgRating
       $group: {
         _id: '$tour',
         nRatings: { $sum: 1 },
@@ -82,7 +68,6 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
       ratingsAverage: stats[0].avgRating,
     });
   } else {
-    //default values
     await Tour.findByIdAndUpdate(tourId, {
       ratingsQuantity: 0,
       ratingsAverage: 4.5,
@@ -90,11 +75,7 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
   }
 };
 
-//this middlware is used, to calculate the tour rating after every post review by a user
-//once a review is saved into the db, it will then calculate the average
 reviewSchema.post('save', function () {
-  //In order to use this function, we called it after a new Review has been created,
-  //for that we need to use this.constructor, vecause this is what point to the current model.
   this.constructor.calcAverageRatings(this.tour);
 });
 
@@ -103,15 +84,11 @@ reviewSchema.post('save', function () {
  * findByIdAndDelete
  */
 reviewSchema.pre(/^findOneAnd/, async function (next) {
-  //saving the tour id to the document, in order to use it in the following post function
   this.r = await this.findOne();
-  // console.log(this.r);
   next();
 });
 
 reviewSchema.post(/^findOneAnd/, async function () {
-  // does not work here, query has already executed
-  // this.r = await this.findOne();
   await this.r.constructor.calcAverageRatings(this.r.tour);
 });
 

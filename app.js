@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
@@ -68,8 +66,8 @@ const fontSrcUrls = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
 //enable cross-origin resources sharing for our entire api
 app.use(cors());
-app.options('*', cors());
 //Access-Control-Allow-Origin to all (*)
+app.options('*', cors());
 
 app.use(
   helmet.contentSecurityPolicy({
@@ -92,7 +90,8 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-//protection from brute force and Dos (Denial of service), limit requests from same api
+//protection from brute force and Dos (Denial of service),
+//limit requests from same api
 const limiter = rateLimit({
   max: 100,
   windowMs: 60 * 60 * 1000,
@@ -134,7 +133,6 @@ app.use(compression());
 //Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  // console.log(req.cookies);
   next();
 });
 
@@ -146,7 +144,8 @@ const bookings = '/bookings';
 const overviewRoute = '/';
 const tourDetailsRoute = '/tour';
 
-//mounting routers
+//**mounting routers
+
 //Api Routes
 app.use(`${rootRoute}${toursRoute}`, tourRouter);
 app.use(`${rootRoute}${usersRoute}`, userRouter);
@@ -156,44 +155,18 @@ app.use(`${rootRoute}${bookings}`, bookingRouter);
 app.use(`${overviewRoute}`, viewRouter);
 app.use(`${tourDetailsRoute}`, viewRouter);
 
-/*handling all routes that are not created in this api, in order to return a json object,
-in case the user type in a route that doesn't exist.
-If we are able to reach this point here, then it means that the request response cycle was not yet
-finished at this point in our code, middle ware is added to the middle ware stack
-as it is defined here in our code. It is sequentially read.
- 'all' is used to catch all reequest types. get, post, del patch etc, with '*'
+/*
+  handling all routes that are not created in this api, in order to return a json object,
+  in case the user type in a route that doesn't exist.
+  If we are able to reach this point here, then it means that the request response cycle was not yet
+  finished at this point in our code, middle ware is added to the middle ware stack
+  as it is defined here in our code. It is sequentially read.
+  'all' is used to catch all reequest types. get, post, del patch etc, with '*'
 */
 app.all('*', (req, res, next) => {
-  // res.status(404).json({
-  //   status: 'fail',
-  //   message: `Can't find ${req.originalUrl} on this server!`,
-  // });
-
-  // const err = new Error(`Can't find ${req.originalUrl} on this server!`);
-  // err.status = 'fail';
-  // err.statusCode = 404;
-
-  //if the next func receives an argument, no matter what it is, express will automatically known
-  // that there was an error, it will assume that whether we pass into next is an error.
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
-//**Part 1 error handling */
-/*to define an error handling middleware, all we need to do is to give middleware function,
-4 arguments and express will then automatically recognize it as an error handling middleware,
-and therefore only call it when there is an error.
-app.use((err, req, res, next) => {
-  err.statusCode = err.statusCode || 500; //means internal server error
-  err.status = err.status || 'error';
-
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-  });
-});
-*/
-
-//**Part 2 error handling refactored*/
 app.use(globalErrorHandler);
 
 module.exports = app;

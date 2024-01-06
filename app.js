@@ -9,6 +9,7 @@ const mongoSanitizer = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -123,10 +124,9 @@ app.use(
   }),
 );
 
-// app.use((req, res, next) => {
-//   console.log('Hello from the middleware :D');
-//   next();
-// });
+//this will return a middleware function, which will then compress all the text
+// that is sent to clients
+app.use(compression());
 
 //Test middleware
 app.use((req, res, next) => {

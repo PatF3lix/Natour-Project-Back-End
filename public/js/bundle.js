@@ -11743,26 +11743,24 @@ var bookTour = exports.bookTour = /*#__PURE__*/function () {
           return (0, _axios.default)("/api/v1/bookings/checkout-session/".concat(tourId));
         case 3:
           session = _context.sent;
-          console.log(session);
-
           //await stripe.redirectToCheckout({
           //  sessionId: session.data.session.id,
           //});
 
           //works as expected
           window.location.replace(session.data.session.url);
-          _context.next = 12;
+          _context.next = 11;
           break;
-        case 8:
-          _context.prev = 8;
+        case 7:
+          _context.prev = 7;
           _context.t0 = _context["catch"](0);
           console.log(_context.t0);
           showAlert('error', _context.t0);
-        case 12:
+        case 11:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[0, 8]]);
+    }, _callee, null, [[0, 7]]);
   }));
   return function bookTour(_x) {
     return _ref.apply(this, arguments);
@@ -11946,15 +11944,14 @@ if (userform) {
             form.append('name', document.getElementById('name').value);
             form.append('email', document.getElementById('email').value);
             form.append('photo', document.getElementById('photo').files[0]);
-            console.log(form);
-            _context.next = 9;
+            _context.next = 8;
             return (0, _updateSettings.updateSettings)('data', form);
-          case 9:
+          case 8:
             window.setTimeout(function () {
               location.reload();
               document.querySelector('.btn--save-settings').textContent = 'Save Settings';
             }, 1500);
-          case 10:
+          case 9:
           case "end":
             return _context.stop();
         }

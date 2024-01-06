@@ -37,13 +37,13 @@ mongoose
         process.exit(1);
       });
     });
+
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM RECEIVED. shutting down grafeully');
+      server.close(() => {
+        console.log('Process terminated!');
+        process.exit(1);
+      });
+    });
   })
   .catch((err) => console.log(err));
-
-process.on('SIGTERM', () => {
-  console.log('SIGTERM RECEIVED. shutting down grafeully');
-  server.close(() => {
-    console.log('Process terminated!');
-    process.exit(1);
-  });
-});
